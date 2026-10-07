@@ -409,6 +409,10 @@ void ComputePerturbations(EnergyMomentumTensorMap *TIn,
       double T0YPert = 0.0;
       double TXYPert = 0.0;
 
+      // Only the bounding box of the causal circle can contribute to the
+      // perturbations (the Distance check below skips everything else).
+      const int CircleRange = int(CircleRadius / afm) + 1;
+
       // CHECK CUT-OFF CRITERION //
       if (T00InAvg <= ENERGY_CUTOFF) {
         // If below the cutoff ignore the perturbations
@@ -421,8 +425,8 @@ void ComputePerturbations(EnergyMomentumTensorMap *TIn,
         goto PERTURBATION_FINISHUP;
       }
 
-      for (int yE = 0; yE < Ns; yE++) {
-        for (int xE = 0; xE < Ns; xE++) {
+      for (int yE = std::max(yS - CircleRange, 0); yE < std::min(yS + CircleRange + 1, Ns); yE++) {
+        for (int xE = std::max(xS - CircleRange, 0); xE < std::min(xS + CircleRange + 1, Ns); xE++) {
 
           // GET COORDINATES RELATIVE TO POINT OF INTEREST //
           double DeltaX = (xS - xE) * afm;
