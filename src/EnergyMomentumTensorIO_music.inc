@@ -136,12 +136,24 @@ void EnergyMomentumTensorMapLoad(EnergyMomentumTensorMap *TIn, std::string fname
     int InputCount=0;
     bool printfirst=true; 
     // GET DATA LINE BY LINE //
-    // Get header first
-    getline(InStream,InputLine);
+    // The first line may be a header (MUSIC-style files) or already data (the bundled examples).
+    // Treat it as a header only if it does not parse as a row of 2 indices + 10 components.
+    bool FirstLine=true;
     while(InStream.good()){
         
         // READ LINE //
         getline(InStream,InputLine);
+
+        if(FirstLine && !(InputLine.empty())){
+            FirstLine=false;
+            std::stringstream Probe(InputLine);
+            double Value; int NValues=0;
+            while(Probe >> Value){NValues++;}
+            if(NValues<12 || InputLine[0]=='#'){
+                std::cerr << "#SKIPPING HEADER LINE: " << InputLine << std::endl;
+                continue;
+            }
+        }
         
         if(!(InputLine.empty())){
             
